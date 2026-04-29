@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SUTTIL | Admin</title>
+  <meta name="description" content="Panel de administracion de productos SUTTIL.">
+  <link rel="stylesheet" href="css/shared.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="page-shell">
+    <section class="login-shell" id="loginView">
+      <div class="login-panel">
+        <div class="brand-lockup">
+          <img class="brand-logo" src="assets/sticker.png" alt="SUTTIL">
+          <span class="brand-sub">Panel de administracion</span>
+        </div>
+
+        <div>
+          <p class="section-kicker">Acceso privado</p>
+          <h1>Gestion de productos</h1>
+        </div>
+
+        <p>Esta pagina es solo para administrar la tienda. Si mas adelante conectas backend, esta pantalla se puede reemplazar por autenticacion real.</p>
+
+        <form id="loginForm" class="field">
+          <label>
+            <span>Clave de administrador</span>
+            <input id="loginPassword" type="password" placeholder="Ingresa tu clave" autocomplete="current-password">
+          </label>
+          <button class="btn btn-primary" type="submit">Entrar al panel</button>
+        </form>
+
+        <p class="login-feedback" id="loginFeedback"></p>
+      </div>
+    </section>
+
+    <section class="admin-page container" id="adminView" hidden>
+      <header class="admin-header">
+        <div class="brand-lockup">
+          <img class="brand-logo" src="assets/sticker.png" alt="SUTTIL">
+          <span class="brand-sub">Administracion</span>
+        </div>
+
+        <div class="admin-header-actions">
+          <a class="btn btn-secondary" href="index.html">Ver tienda</a>
+          <button class="btn btn-secondary" id="sheetRefreshButton" type="button">Sincronizar hoja</button>
+          <button class="btn btn-secondary" id="resetButton" type="button" hidden>Resetear cache</button>
+          <button class="btn btn-primary" id="logoutButton" type="button">Cerrar sesion</button>
+        </div>
+      </header>
+
+      <div class="admin-layout">
+        <aside class="admin-sidebar">
+          <div>
+            <p class="section-kicker">Resumen</p>
+            <h2 class="section-title">Control del drop</h2>
+          </div>
+
+          <p>Desde aca podes revisar lo que la tienda esta leyendo desde Google Sheets. Los cambios de productos, imagenes, precios, visibilidad y stock se hacen en la hoja publicada.</p>
+
+          <section class="sheet-status panel" aria-live="polite">
+            <div class="sheet-status-head">
+              <div>
+                <p class="section-kicker">Sincronizacion</p>
+                <h3>Google Sheets</h3>
+              </div>
+              <span class="pill muted" id="sheetStatusPill">Esperando</span>
+            </div>
+            <p id="sheetStatusMessage">Todavia no se reviso la hoja publicada.</p>
+            <div class="sheet-status-meta" id="sheetStatusMeta"></div>
+            <a class="sheet-status-link" id="sheetStatusLink" href="#" target="_blank" rel="noreferrer">Abrir hoja publicada</a>
+          </section>
+
+          <div class="admin-stats">
+            <div class="stat-card">
+              <strong id="visibleCount">0</strong>
+              <span>Visibles</span>
+            </div>
+            <div class="stat-card">
+              <strong id="hiddenCount">0</strong>
+              <span>Ocultas</span>
+            </div>
+            <div class="stat-card">
+              <strong id="totalCount">0</strong>
+              <span>Productos</span>
+            </div>
+            <div class="stat-card">
+              <strong id="totalUnits">0</strong>
+              <span>Unidades</span>
+            </div>
+          </div>
+
+          <form id="createForm" class="field" hidden>
+            <div>
+              <p class="section-kicker">Alta de producto</p>
+              <h3>Agregar remera</h3>
+            </div>
+
+            <label>
+              <span>Nombre</span>
+              <input name="name" type="text" required>
+            </label>
+
+            <label>
+              <span>Precio</span>
+              <input name="price" type="number" min="0" step="500" required>
+            </label>
+
+            <label>
+              <span>Tag</span>
+              <input name="tag" type="text" required>
+            </label>
+
+            <label>
+              <span>Tono</span>
+              <input name="tone" type="text" placeholder="Negro / frente centrado" required>
+            </label>
+
+            <label>
+              <span>Descripcion</span>
+              <textarea name="description" rows="3" required></textarea>
+            </label>
+
+            <label>
+              <span>Ruta o URL de imagen</span>
+              <input name="image" type="text" placeholder="assets/nueva-remera.png">
+            </label>
+
+            <label>
+              <span>O subir imagen desde tu PC</span>
+              <input name="imageFile" type="file" accept="image/png,image/jpeg,image/webp">
+            </label>
+
+            <label>
+              <span>Talles y stock</span>
+              <input name="sizes" type="text" placeholder="S:4, M:2, L:0, XL:1" required>
+            </label>
+
+            <label class="toggle-row">
+              <input name="visible" type="checkbox" checked>
+              <span>Mostrar en la tienda al guardar</span>
+            </label>
+
+            <p class="hint">Si no hay backend, las imagenes nuevas subidas desde aca quedan guardadas en el navegador como solucion provisoria.</p>
+
+            <button class="btn btn-accent" type="submit">Crear producto</button>
+          </form>
+        </aside>
+
+        <main class="admin-main">
+          <div class="admin-main-head">
+            <div>
+              <p class="section-kicker">Inventario</p>
+              <h2 class="section-title">Productos cargados</h2>
+            </div>
+          <p>Cada tarjeta muestra los datos publicados en la hoja. Para modificar algo, edita Google Sheets y luego sincroniza.</p>
+          </div>
+
+          <div class="admin-list" id="adminList"></div>
+        </main>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/products.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
