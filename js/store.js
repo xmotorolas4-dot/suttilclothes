@@ -35,12 +35,15 @@
   const zoomAdd = document.getElementById("zoomAdd");
   const zoomWhatsapp = document.getElementById("zoomWhatsapp");
   const zoomClose = document.getElementById("zoomClose");
+  const siteHeader = document.querySelector(".site-header");
+  const mobileCta = document.querySelector(".mobile-cta");
 
   let products = [];
   let selectedSizes = {};
   let activeProductId = "";
   let openProductId = "";
   let zoomProductId = "";
+  let lastScrollY = window.scrollY;
   const cart = [];
 
   async function refreshProducts() {
@@ -298,6 +301,23 @@
     zoomModal.classList.remove("open");
   }
 
+  function syncScrollUi() {
+    const currentScrollY = window.scrollY;
+    const isMobile = window.matchMedia("(max-width: 760px)").matches;
+    const isNearBottom = window.innerHeight + currentScrollY >= document.documentElement.scrollHeight - 90;
+    const shouldHideHeader = isMobile && currentScrollY > 90 && currentScrollY > lastScrollY;
+
+    if (siteHeader) {
+      siteHeader.classList.toggle("is-hidden", shouldHideHeader);
+    }
+
+    if (mobileCta) {
+      mobileCta.classList.toggle("is-visible", isMobile && isNearBottom);
+    }
+
+    lastScrollY = currentScrollY;
+  }
+
   productGrid.addEventListener("mouseover", (event) => {
     const card = event.target.closest(".product-card");
     if (!card) {
@@ -403,10 +423,14 @@
     renderProducts();
   });
 
+  window.addEventListener("scroll", syncScrollUi, { passive: true });
+  window.addEventListener("resize", syncScrollUi);
+
   async function init() {
     await refreshProducts();
     renderProducts();
     renderCart();
+    syncScrollUi();
   }
 
   init();

@@ -37,6 +37,8 @@
   backdrop-filter: blur(14px);
   background: rgba(10, 10, 10, 0.88);
   border-bottom: 1px solid var(--line);
+  transition: transform 0.28s ease, background 0.28s ease;
+  will-change: transform;
 }
 
 .nav {
@@ -866,24 +868,50 @@
   }
 
   .mobile-cta {
-    display: block;
+    display: flex;
+    justify-content: flex-end;
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 22;
     padding: 0.55rem 0.8rem calc(0.55rem + env(safe-area-inset-bottom));
-    background: rgba(10, 10, 10, 0.96);
-    border-top: 1px solid var(--line);
-    backdrop-filter: blur(10px);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(120%);
+    transition: opacity 0.28s ease, transform 0.28s ease;
   }
 
-  .mobile-cta .btn {
-    width: 100%;
+  .site-header.is-hidden {
+    transform: translateY(-100%);
+  }
+
+  .mobile-cta.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .mobile-cta .whatsapp-float {
+    width: 3.55rem;
+    height: 3.55rem;
+    min-height: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    color: #0a0a0a;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+  }
+
+  .whatsapp-mark {
+    width: 1.9rem;
+    height: 1.9rem;
+    fill: currentColor;
   }
 
   .site-footer {
-    padding-bottom: 5rem;
+    padding-bottom: 1rem;
   }
 }
 
