@@ -244,8 +244,7 @@
 
 .products,
 .spotlight,
-.contact,
-footer {
+.contact {
   padding-bottom: 2.2rem;
 }
 
@@ -530,18 +529,77 @@ footer {
 }
 
 .contact-inner p,
-footer p,
-footer a {
+.site-footer p,
+.site-footer a {
   color: var(--muted);
   line-height: 1.6;
 }
 
-footer {
+.site-footer {
+  border-top: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+    rgba(10, 10, 10, 0.82);
+}
+
+.footer-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(150px, 0.6fr) minmax(220px, 0.8fr);
+  gap: 2rem;
+  align-items: start;
+  padding-block: 2rem 1.2rem;
+}
+
+.footer-brand {
+  display: grid;
+  gap: 1rem;
+  max-width: 520px;
+}
+
+.footer-lockup {
+  width: fit-content;
+}
+
+.footer-brand .brand-logo {
+  width: clamp(140px, 14vw, 220px);
+}
+
+.footer-title {
+  color: var(--ink);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 900;
+  margin-bottom: 0.45rem;
+}
+
+.footer-links,
+.footer-contact {
+  display: grid;
+  gap: 0.58rem;
+}
+
+.footer-contact {
+  font-style: normal;
+}
+
+.footer-links a,
+.footer-contact a {
+  width: fit-content;
+}
+
+.footer-links a:hover,
+.footer-contact a:hover {
+  color: var(--accent);
+}
+
+.footer-bottom {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
-  padding-bottom: 2rem;
+  padding-block: 1rem 2rem;
+  border-top: 1px solid var(--line);
 }
 
 .mobile-cta {
@@ -782,7 +840,8 @@ footer {
 
   .section-head,
   .contact-inner,
-  footer {
+  .footer-inner,
+  .footer-bottom {
     grid-template-columns: 1fr;
     display: grid;
   }
@@ -823,7 +882,7 @@ footer {
     width: 100%;
   }
 
-  footer {
+  .site-footer {
     padding-bottom: 5rem;
   }
 }
