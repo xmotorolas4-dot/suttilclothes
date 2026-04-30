@@ -833,6 +833,11 @@
     flex-wrap: wrap;
   }
 
+  .site-header {
+    position: static;
+    transform: none;
+  }
+
   .hero-note,
   .section-band-inner,
   .product-grid,
@@ -868,45 +873,48 @@
   }
 
   .mobile-cta {
-    display: flex;
-    justify-content: flex-end;
+    display: block;
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    left: auto;
     z-index: 22;
-    padding: 0.55rem 0.8rem calc(0.55rem + env(safe-area-inset-bottom));
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
     pointer-events: none;
     opacity: 0;
-    transform: translateY(120%);
+    transform: translateY(1rem) scale(0.92);
     transition: opacity 0.28s ease, transform 0.28s ease;
   }
 
   .site-header.is-hidden {
-    transform: translateY(-100%);
+    transform: none;
   }
 
   .mobile-cta.is-visible {
     opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
+    transform: translateY(0) scale(1);
   }
 
   .mobile-cta .whatsapp-float {
-    width: 3.55rem;
-    height: 3.55rem;
+    width: 3rem;
+    height: 3rem;
     min-height: 0;
     padding: 0;
     display: grid;
     place-items: center;
     border-radius: 999px;
-    color: #0a0a0a;
-    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+    border-color: #25d366;
+    background: #25d366;
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
+    pointer-events: auto;
   }
 
   .whatsapp-mark {
-    width: 1.9rem;
-    height: 1.9rem;
+    width: 1.55rem;
+    height: 1.55rem;
     fill: currentColor;
   }
 
