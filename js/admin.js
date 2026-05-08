@@ -120,6 +120,10 @@
   }
 
   function renderProductCard(product) {
+    const imageList = Array.isArray(product.images) && product.images.length
+      ? product.images.join(", ")
+      : product.image;
+
     return `
       <article class="product-edit-card" data-id="${escapeHtml(product.id)}">
         <div class="product-edit-preview">
@@ -158,7 +162,7 @@
             </label>
             <label class="full">
               <span>Ruta o URL de imagen</span>
-              <input name="image" type="text" value="${escapeHtml(product.image)}" readonly>
+              <input name="image" type="text" value="${escapeHtml(imageList)}" readonly>
             </label>
             <label class="full field-readonly">
               <span>Talles y stock</span>
