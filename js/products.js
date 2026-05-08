@@ -17,7 +17,7 @@
     sizes: ["Talles", "talles", "Sizes", "sizes"],
     stock: ["Stock", "stock", "Cantidad", "cantidad", "Unidades", "unidades"],
     price: ["Precio", "precio", "Price", "price"],
-    image: ["Imagen", "imagen", "Image", "image", "Foto", "foto", "URL imagen", "url imagen"],
+    image: ["Imagen", "imagen", "Image", "image", "Img", "img", "Foto", "foto", "URL imagen", "url imagen"],
     tag: ["Tag", "tag", "Etiqueta", "etiqueta"],
     tone: ["Tono", "tono", "Color", "color", "Detalle", "detalle"],
     description: ["Descripcion", "descripcion", "Description", "description", "Detalle largo", "detalle largo"],
@@ -92,12 +92,14 @@
 
   function normalizeProduct(product, index) {
     const name = String(product?.name || `Producto ${index + 1}`).trim();
+    const images = normalizeImages(product?.images || product?.image);
 
     return {
       id: String(product?.id || slugify(name)).trim(),
       name,
       price: Math.max(0, Number(product?.price) || 0),
-      image: String(product?.image || DEFAULT_IMAGE).trim() || DEFAULT_IMAGE,
+      image: images[0],
+      images,
       tag: String(product?.tag || name).trim(),
       tone: String(product?.tone || "Drop SUTTIL").trim(),
       description: String(product?.description || "Prenda disponible en la coleccion actual.").trim(),
@@ -106,6 +108,24 @@
       sheetManaged: Boolean(product?.sheetManaged),
       sheetRows: Math.max(0, Number(product?.sheetRows) || 0)
     };
+  }
+
+  function normalizeImages(value, fallback = DEFAULT_IMAGE) {
+    const fallbackImages = Array.isArray(fallback) ? fallback : [fallback];
+    const parts = Array.isArray(value)
+      ? value
+      : String(value || "").split(",");
+    const images = parts
+      .map((part) => String(part || "").trim())
+      .filter(Boolean);
+
+    if (images.length) {
+      return Array.from(new Set(images));
+    }
+
+    return fallbackImages
+      .map((part) => String(part || "").trim())
+      .filter(Boolean);
   }
 
   function parseLooseNumber(value) {
@@ -371,6 +391,7 @@
           name: productName,
           price: 0,
           image: DEFAULT_IMAGE,
+          images: [DEFAULT_IMAGE],
           tag: productName,
           tone: "Drop SUTTIL",
           description: "Prenda disponible en la coleccion actual.",
@@ -403,7 +424,11 @@
       }
 
       if (imageValue) {
-        group.image = imageValue;
+        const images = normalizeImages(imageValue, []);
+        if (images.length) {
+          group.image = images[0];
+          group.images = images;
+        }
       }
 
       if (tagValue) {

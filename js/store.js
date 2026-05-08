@@ -26,6 +26,7 @@
 
   const zoomModal = document.getElementById("zoomModal");
   const zoomImage = document.getElementById("zoomImage");
+  const zoomThumbs = document.getElementById("zoomThumbs");
   const zoomTitle = document.getElementById("zoomTitle");
   const zoomPrice = document.getElementById("zoomPrice");
   const zoomStock = document.getElementById("zoomStock");
@@ -43,6 +44,7 @@
   let activeProductId = "";
   let openProductId = "";
   let zoomProductId = "";
+  let activeZoomImageIndex = 0;
   let lastScrollY = window.scrollY;
   const cart = [];
 
@@ -70,6 +72,16 @@
 
   function getProduct(productId) {
     return products.find((product) => product.id === productId);
+  }
+
+  function getProductImages(product) {
+    const images = Array.isArray(product?.images) && product.images.length
+      ? product.images
+      : [product?.image || "assets/sticker.png"];
+
+    return images
+      .map((image) => String(image || "").trim())
+      .filter(Boolean);
   }
 
   function getAvailabilityCopy(product) {
@@ -277,9 +289,23 @@
 
     const selectedSize = selectedSizes[product.id] || "";
     const canAdd = product.sizes.some((size) => size.label === selectedSize && size.stock > 0);
+    const images = getProductImages(product);
+    const selectedImageIndex = Math.min(activeZoomImageIndex, images.length - 1);
 
-    zoomImage.src = product.image;
+    activeZoomImageIndex = selectedImageIndex;
+    zoomImage.src = images[selectedImageIndex] || product.image;
     zoomImage.alt = product.name;
+    zoomThumbs.hidden = images.length <= 1;
+    zoomThumbs.innerHTML = images.map((image, index) => `
+      <button
+        class="zoom-thumb${index === selectedImageIndex ? " active" : ""}"
+        type="button"
+        data-index="${index}"
+        aria-label="Ver foto ${index + 1} de ${escapeHtml(product.name)}"
+      >
+        <img src="${escapeHtml(image)}" alt="">
+      </button>
+    `).join("");
     zoomTitle.textContent = product.name;
     zoomPrice.textContent = formatPrice(product.price);
     zoomStock.textContent = getAvailabilityCopy(product);
@@ -292,12 +318,14 @@
 
   function openZoom(productId) {
     zoomProductId = productId;
+    activeZoomImageIndex = 0;
     renderZoom();
     zoomModal.classList.add("open");
   }
 
   function closeZoom() {
     zoomProductId = "";
+    activeZoomImageIndex = 0;
     zoomModal.classList.remove("open");
   }
 
@@ -383,6 +411,16 @@
 
     selectedSizes[zoomProductId] = button.dataset.size;
     renderProducts();
+    renderZoom();
+  });
+
+  zoomThumbs.addEventListener("click", (event) => {
+    const button = event.target.closest(".zoom-thumb");
+    if (!button || !zoomProductId) {
+      return;
+    }
+
+    activeZoomImageIndex = Number(button.dataset.index) || 0;
     renderZoom();
   });
 
