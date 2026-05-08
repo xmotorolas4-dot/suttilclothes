@@ -188,7 +188,7 @@
     heroProductImage.alt = product.name;
     heroTag.innerHTML = `<span class="pulse-dot"></span> ${escapeHtml(product.tag)}`;
     heroTagText.textContent = `${product.description} ${getAvailabilityCopy(product)}`;
-    heroTitle.innerHTML = `Remeras con <span class="accent">${escapeHtml(product.tag)}</span>.`;
+    heroTitle.innerHTML = `Remera <span class="accent">${escapeHtml(product.tag)}</span>.`;
   }
 
   function renderProducts() {
