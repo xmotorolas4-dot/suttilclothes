@@ -161,6 +161,28 @@ ESSENTIAL BEIGE 02,FALSE,FALSE,FALSE,TRUE,"$45,000.00","https://res.cloudinary.c
       .filter(Boolean);
   }
 
+  function optimizeImageUrl(url, width = 900) {
+    const src = String(url || "").trim();
+    const targetWidth = Math.max(160, Math.min(1800, Number(width) || 900));
+
+    if (!src || !src.includes("res.cloudinary.com") || !src.includes("/image/upload/")) {
+      return src;
+    }
+
+    const transform = `f_auto,q_auto:best,c_limit,w_${targetWidth}`;
+    const [base, suffix] = src.split("/image/upload/");
+
+    if (!base || !suffix) {
+      return src;
+    }
+
+    if (suffix.startsWith(`${transform}/`) || suffix.includes("/f_auto,")) {
+      return src;
+    }
+
+    return `${base}/image/upload/${transform}/${suffix}`;
+  }
+
   function parseLooseNumber(value) {
     const raw = String(value || "").trim();
     if (!raw) {
@@ -643,6 +665,7 @@ ESSENTIAL BEIGE 02,FALSE,FALSE,FALSE,TRUE,"$45,000.00","https://res.cloudinary.c
     slugify,
     normalizeProduct,
     normalizeSizes,
+    optimizeImageUrl,
     loadProducts,
     saveProducts,
     resetProducts,

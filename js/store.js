@@ -4,6 +4,7 @@
     hasAvailableSizes,
     formatPrice,
     escapeHtml,
+    optimizeImageUrl,
     WHATSAPP_PHONE
   } = window.SuttilProducts;
 
@@ -14,6 +15,7 @@
   const heroTitle = document.getElementById("heroTitle");
   const collectionTitle = document.getElementById("collectionTitle");
   const categoryFilter = document.getElementById("categoryFilter");
+  const sizeFilter = document.getElementById("sizeFilter");
   const spotlightVisual = document.getElementById("spotlightVisual");
   const storeMain = document.getElementById("storeMain");
   const productDetailView = document.getElementById("productDetailView");
@@ -61,9 +63,11 @@
   let activeDetailImageIndex = 0;
   let activeZoomImageIndex = 0;
   let activeCategory = "all";
+  let activeSize = "all";
   let lastScrollY = window.scrollY;
   let lockedScrollY = 0;
   const cart = [];
+  const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
   async function refreshProducts() {
     const { products: syncedProducts } = await syncProductsFromSheet();
@@ -106,13 +110,56 @@
     return Array.from(categories.values());
   }
 
-  function getFilteredProducts() {
+  function compareSizeLabels(a, b) {
+    const aIndex = sizeOrder.indexOf(a);
+    const bIndex = sizeOrder.indexOf(b);
+
+    if (aIndex !== -1 || bIndex !== -1) {
+      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex)
+        - (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
+    }
+
+    return a.localeCompare(b, "es");
+  }
+
+  function productHasAvailableSize(product, sizeLabel) {
+    return (product?.sizes || []).some((size) => (
+      String(size.label || "").toLowerCase() === String(sizeLabel || "").toLowerCase()
+        && Number(size.stock) > 0
+    ));
+  }
+
+  function getProductsByCategory() {
     if (activeCategory === "all") {
       return products;
     }
 
     const activeKey = activeCategory.toLowerCase();
     return products.filter((product) => getProductCategory(product).toLowerCase() === activeKey);
+  }
+
+  function getAvailableSizesForCategory() {
+    const sizes = new Set();
+
+    getProductsByCategory().forEach((product) => {
+      (product.sizes || []).forEach((size) => {
+        if (Number(size.stock) > 0 && size.label) {
+          sizes.add(size.label);
+        }
+      });
+    });
+
+    return Array.from(sizes).sort(compareSizeLabels);
+  }
+
+  function getFilteredProducts() {
+    const categoryProducts = getProductsByCategory();
+
+    if (activeSize === "all") {
+      return categoryProducts;
+    }
+
+    return categoryProducts.filter((product) => productHasAvailableSize(product, activeSize));
   }
 
   function syncActiveProductForFilter(filteredProducts) {
@@ -139,6 +186,10 @@
     return images
       .map((image) => String(image || "").trim())
       .filter(Boolean);
+  }
+
+  function imageSrc(url, width) {
+    return optimizeImageUrl(url, width);
   }
 
   function getAvailabilityCopy(product) {
@@ -299,7 +350,7 @@
     detailRelated.innerHTML = relatedProducts.map((item) => `
       <article class="detail-related-card" data-id="${escapeHtml(item.id)}">
         <div class="detail-related-media">
-          <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
+          <img src="${escapeHtml(imageSrc(item.image, 700))}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async">
         </div>
         <h3>${escapeHtml(item.name)}</h3>
         <div class="detail-related-price">${formatPrice(item.price)}</div>
@@ -320,7 +371,7 @@
     const whatsappLink = buildWhatsappLink(product, selectedSize);
 
     activeDetailImageIndex = selectedImageIndex;
-    detailMainImage.src = images[selectedImageIndex] || product.image;
+    detailMainImage.src = imageSrc(images[selectedImageIndex] || product.image, 1800);
     detailMainImage.alt = product.name;
     detailCategory.textContent = getProductCategory(product) || product.tone || "SUTTIL";
     detailName.textContent = product.name;
@@ -377,7 +428,7 @@
     return `
       <article class="product-card${activeProductId === product.id ? " is-active" : ""}${openProductId === product.id ? " is-open" : ""}" data-id="${escapeHtml(product.id)}">
         <div class="product-media">
-          <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
+          <img src="${escapeHtml(imageSrc(product.image, 900))}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async">
         </div>
         <div class="product-body">
           <div class="product-topline">
@@ -415,7 +466,7 @@
   function renderSpotlight() {
     spotlightVisual.innerHTML = getFilteredProducts().slice(0, 2).map((product) => `
       <div class="spotlight-tile">
-        <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
+        <img src="${escapeHtml(imageSrc(product.image, 1100))}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async">
       </div>
     `).join("");
   }
@@ -444,7 +495,7 @@
     }
 
     if (heroProductImage) {
-      heroProductImage.src = product.image;
+      heroProductImage.src = imageSrc(product.image, 1400);
       heroProductImage.alt = product.name;
     }
 
@@ -497,8 +548,46 @@
     ].join("");
   }
 
+  function renderSizeFilter() {
+    if (!sizeFilter) {
+      return;
+    }
+
+    const sizeFilterShell = sizeFilter.closest(".size-filter-shell");
+    const sizes = getAvailableSizesForCategory();
+    const sizeKeys = new Set(sizes.map((size) => size.toLowerCase()));
+
+    if (activeSize !== "all" && !sizeKeys.has(activeSize.toLowerCase())) {
+      activeSize = "all";
+    }
+
+    if (!sizes.length) {
+      if (sizeFilterShell) {
+        sizeFilterShell.hidden = true;
+      }
+      sizeFilter.innerHTML = "";
+      return;
+    }
+
+    if (sizeFilterShell) {
+      sizeFilterShell.hidden = false;
+    }
+
+    sizeFilter.innerHTML = [
+      `<button class="size-filter-btn${activeSize === "all" ? " active" : ""}" type="button" data-size-filter="all">Todos</button>`,
+      ...sizes.map((size) => `
+        <button
+          class="size-filter-btn${activeSize.toLowerCase() === size.toLowerCase() ? " active" : ""}"
+          type="button"
+          data-size-filter="${escapeHtml(size)}"
+        >${escapeHtml(size)}</button>
+      `)
+    ].join("");
+  }
+
   function renderProducts() {
     renderCategoryFilter();
+    renderSizeFilter();
 
     if (!products.length) {
       productGrid.innerHTML = `
@@ -519,11 +608,16 @@
     syncActiveProductForFilter(filteredProducts);
 
     if (!filteredProducts.length) {
+      const activeFiltersText = [
+        activeCategory !== "all" ? `categoria ${activeCategory}` : "",
+        activeSize !== "all" ? `talle ${activeSize}` : ""
+      ].filter(Boolean).join(" y ");
+
       productGrid.innerHTML = `
         <article class="product-card is-open">
           <div class="product-body">
-            <h3 class="product-name">No hay prendas en esta categoria</h3>
-            <p class="product-copy">Proba con otra categoria o revisa la hoja publicada.</p>
+            <h3 class="product-name">No hay prendas para este filtro</h3>
+            <p class="product-copy">Proba con otro filtro${activeFiltersText ? `: ${escapeHtml(activeFiltersText)}` : ""}.</p>
           </div>
         </article>
       `;
@@ -534,8 +628,8 @@
     }
 
     collectionTitle.textContent = activeCategory === "all"
-      ? `${filteredProducts.length} modelos listos para destacar`
-      : `${filteredProducts.length} modelos en ${activeCategory}`;
+      ? `${filteredProducts.length} modelos listos para destacar${activeSize === "all" ? "" : ` en talle ${activeSize}`}`
+      : `${filteredProducts.length} modelos en ${activeCategory}${activeSize === "all" ? "" : ` talle ${activeSize}`}`;
     productGrid.innerHTML = filteredProducts.map(renderProductCard).join("");
     syncHero();
     renderSpotlight();
@@ -625,7 +719,7 @@
     const selectedImageIndex = Math.min(activeZoomImageIndex, images.length - 1);
 
     activeZoomImageIndex = selectedImageIndex;
-    zoomImage.src = images[selectedImageIndex] || product.image;
+    zoomImage.src = imageSrc(images[selectedImageIndex] || product.image, 1800);
     zoomImage.alt = product.name;
     zoomThumbs.hidden = images.length <= 1;
     zoomThumbs.innerHTML = images.map((image, index) => `
@@ -635,7 +729,7 @@
         data-index="${index}"
         aria-label="Ver foto ${index + 1} de ${escapeHtml(product.name)}"
       >
-        <img src="${escapeHtml(image)}" alt="">
+        <img src="${escapeHtml(imageSrc(image, 260))}" alt="" loading="lazy" decoding="async">
       </button>
     `).join("");
   }
@@ -710,6 +804,16 @@
     }
 
     activeCategory = button.dataset.category || "all";
+    renderProducts();
+  });
+
+  sizeFilter?.addEventListener("click", (event) => {
+    const button = event.target.closest(".size-filter-btn");
+    if (!button) {
+      return;
+    }
+
+    activeSize = button.dataset.sizeFilter || "all";
     renderProducts();
   });
 
