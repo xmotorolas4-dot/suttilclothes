@@ -4,8 +4,9 @@
   const ADMIN_PASSWORD = "suttil2026";
   const WHATSAPP_PHONE = "3464624227";
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCiZyzCSU3bjNEY-rfgu_FmZSpcdQ7KzBvzbCgkCQiapQTjkAB5NJnXs8V5OqDZJJJKfcGLmR2YxjA/pub?output=csv";
+  const SHEET_CSV_API_URL = "/api/products";
   const SHEET_CSV_PROXY_URL = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(SHEET_CSV_URL)}`;
-  const SHEET_FETCH_URLS = [SHEET_CSV_PROXY_URL, SHEET_CSV_URL];
+  const SHEET_FETCH_URLS = [SHEET_CSV_API_URL, SHEET_CSV_PROXY_URL, SHEET_CSV_URL];
   const SHEET_FETCH_TIMEOUT_MS = 8000;
   const DEFAULT_IMAGE = "assets/sticker.png";
   const DEFAULT_SIZES = ["S", "M", "L", "XL", "XXL"];
