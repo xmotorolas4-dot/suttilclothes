@@ -55,8 +55,8 @@
       name="twitter:image"
       content="https://suttilclothes.com/assets/sticker.png"
     />
-    <link rel="stylesheet" href="css/shared.css?v=20260514-img2" />
-    <link rel="stylesheet" href="css/store.css?v=20260514-img2" />
+    <link rel="stylesheet" href="css/shared.css?v=20260514-size" />
+    <link rel="stylesheet" href="css/store.css?v=20260514-size" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -179,13 +179,24 @@
             </p>
           </div>
 
-          <div class="category-filter-shell">
-            <span class="category-filter-label">Categorias</span>
-            <div
-              class="category-filter"
-              id="categoryFilter"
-              aria-label="Filtrar por categoria"
-            ></div>
+          <div class="filter-stack">
+            <div class="category-filter-shell">
+              <span class="category-filter-label">Categorias</span>
+              <div
+                class="category-filter"
+                id="categoryFilter"
+                aria-label="Filtrar por categoria"
+              ></div>
+            </div>
+
+            <div class="size-filter-shell">
+              <span class="size-filter-label">Talles</span>
+              <div
+                class="size-filter"
+                id="sizeFilter"
+                aria-label="Filtrar por talle disponible"
+              ></div>
+            </div>
           </div>
 
           <div class="product-grid" id="productGrid"></div>
@@ -468,7 +479,7 @@
       </div>
     </aside>
 
-    <script src="js/products.js?v=20260514-img2"></script>
-    <script src="js/store.js?v=20260514-img2"></script>
+    <script src="js/products.js?v=20260514-size"></script>
+    <script src="js/store.js?v=20260514-size"></script>
   </body>
 </html>

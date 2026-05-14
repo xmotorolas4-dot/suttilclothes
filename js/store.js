@@ -15,6 +15,7 @@
   const heroTitle = document.getElementById("heroTitle");
   const collectionTitle = document.getElementById("collectionTitle");
   const categoryFilter = document.getElementById("categoryFilter");
+  const sizeFilter = document.getElementById("sizeFilter");
   const spotlightVisual = document.getElementById("spotlightVisual");
   const storeMain = document.getElementById("storeMain");
   const productDetailView = document.getElementById("productDetailView");
@@ -62,9 +63,11 @@
   let activeDetailImageIndex = 0;
   let activeZoomImageIndex = 0;
   let activeCategory = "all";
+  let activeSize = "all";
   let lastScrollY = window.scrollY;
   let lockedScrollY = 0;
   const cart = [];
+  const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
   async function refreshProducts() {
     const { products: syncedProducts } = await syncProductsFromSheet();
@@ -107,13 +110,56 @@
     return Array.from(categories.values());
   }
 
-  function getFilteredProducts() {
+  function compareSizeLabels(a, b) {
+    const aIndex = sizeOrder.indexOf(a);
+    const bIndex = sizeOrder.indexOf(b);
+
+    if (aIndex !== -1 || bIndex !== -1) {
+      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex)
+        - (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
+    }
+
+    return a.localeCompare(b, "es");
+  }
+
+  function productHasAvailableSize(product, sizeLabel) {
+    return (product?.sizes || []).some((size) => (
+      String(size.label || "").toLowerCase() === String(sizeLabel || "").toLowerCase()
+        && Number(size.stock) > 0
+    ));
+  }
+
+  function getProductsByCategory() {
     if (activeCategory === "all") {
       return products;
     }
 
     const activeKey = activeCategory.toLowerCase();
     return products.filter((product) => getProductCategory(product).toLowerCase() === activeKey);
+  }
+
+  function getAvailableSizesForCategory() {
+    const sizes = new Set();
+
+    getProductsByCategory().forEach((product) => {
+      (product.sizes || []).forEach((size) => {
+        if (Number(size.stock) > 0 && size.label) {
+          sizes.add(size.label);
+        }
+      });
+    });
+
+    return Array.from(sizes).sort(compareSizeLabels);
+  }
+
+  function getFilteredProducts() {
+    const categoryProducts = getProductsByCategory();
+
+    if (activeSize === "all") {
+      return categoryProducts;
+    }
+
+    return categoryProducts.filter((product) => productHasAvailableSize(product, activeSize));
   }
 
   function syncActiveProductForFilter(filteredProducts) {
@@ -502,8 +548,46 @@
     ].join("");
   }
 
+  function renderSizeFilter() {
+    if (!sizeFilter) {
+      return;
+    }
+
+    const sizeFilterShell = sizeFilter.closest(".size-filter-shell");
+    const sizes = getAvailableSizesForCategory();
+    const sizeKeys = new Set(sizes.map((size) => size.toLowerCase()));
+
+    if (activeSize !== "all" && !sizeKeys.has(activeSize.toLowerCase())) {
+      activeSize = "all";
+    }
+
+    if (!sizes.length) {
+      if (sizeFilterShell) {
+        sizeFilterShell.hidden = true;
+      }
+      sizeFilter.innerHTML = "";
+      return;
+    }
+
+    if (sizeFilterShell) {
+      sizeFilterShell.hidden = false;
+    }
+
+    sizeFilter.innerHTML = [
+      `<button class="size-filter-btn${activeSize === "all" ? " active" : ""}" type="button" data-size-filter="all">Todos</button>`,
+      ...sizes.map((size) => `
+        <button
+          class="size-filter-btn${activeSize.toLowerCase() === size.toLowerCase() ? " active" : ""}"
+          type="button"
+          data-size-filter="${escapeHtml(size)}"
+        >${escapeHtml(size)}</button>
+      `)
+    ].join("");
+  }
+
   function renderProducts() {
     renderCategoryFilter();
+    renderSizeFilter();
 
     if (!products.length) {
       productGrid.innerHTML = `
@@ -524,11 +608,16 @@
     syncActiveProductForFilter(filteredProducts);
 
     if (!filteredProducts.length) {
+      const activeFiltersText = [
+        activeCategory !== "all" ? `categoria ${activeCategory}` : "",
+        activeSize !== "all" ? `talle ${activeSize}` : ""
+      ].filter(Boolean).join(" y ");
+
       productGrid.innerHTML = `
         <article class="product-card is-open">
           <div class="product-body">
-            <h3 class="product-name">No hay prendas en esta categoria</h3>
-            <p class="product-copy">Proba con otra categoria o revisa la hoja publicada.</p>
+            <h3 class="product-name">No hay prendas para este filtro</h3>
+            <p class="product-copy">Proba con otro filtro${activeFiltersText ? `: ${escapeHtml(activeFiltersText)}` : ""}.</p>
           </div>
         </article>
       `;
@@ -539,8 +628,8 @@
     }
 
     collectionTitle.textContent = activeCategory === "all"
-      ? `${filteredProducts.length} modelos listos para destacar`
-      : `${filteredProducts.length} modelos en ${activeCategory}`;
+      ? `${filteredProducts.length} modelos listos para destacar${activeSize === "all" ? "" : ` en talle ${activeSize}`}`
+      : `${filteredProducts.length} modelos en ${activeCategory}${activeSize === "all" ? "" : ` talle ${activeSize}`}`;
     productGrid.innerHTML = filteredProducts.map(renderProductCard).join("");
     syncHero();
     renderSpotlight();
@@ -715,6 +804,16 @@
     }
 
     activeCategory = button.dataset.category || "all";
+    renderProducts();
+  });
+
+  sizeFilter?.addEventListener("click", (event) => {
+    const button = event.target.closest(".size-filter-btn");
+    if (!button) {
+      return;
+    }
+
+    activeSize = button.dataset.sizeFilter || "all";
     renderProducts();
   });
 
