@@ -15,6 +15,25 @@
   const collectionTitle = document.getElementById("collectionTitle");
   const categoryFilter = document.getElementById("categoryFilter");
   const spotlightVisual = document.getElementById("spotlightVisual");
+  const storeMain = document.getElementById("storeMain");
+  const productDetailView = document.getElementById("productDetailView");
+  const detailBack = document.getElementById("detailBack");
+  const detailCartButton = document.getElementById("detailCartButton");
+  const detailPhotoButton = document.getElementById("detailPhotoButton");
+  const detailPrevButton = document.getElementById("detailPrevButton");
+  const detailNextButton = document.getElementById("detailNextButton");
+  const detailMainImage = document.getElementById("detailMainImage");
+  const detailDots = document.getElementById("detailDots");
+  const detailCategory = document.getElementById("detailCategory");
+  const detailName = document.getElementById("detailName");
+  const detailWhatsapp = document.getElementById("detailWhatsapp");
+  const detailPrice = document.getElementById("detailPrice");
+  const detailDescription = document.getElementById("detailDescription");
+  const detailStock = document.getElementById("detailStock");
+  const detailSizes = document.getElementById("detailSizes");
+  const detailAddButton = document.getElementById("detailAddButton");
+  const detailConsultButton = document.getElementById("detailConsultButton");
+  const detailRelated = document.getElementById("detailRelated");
 
   const overlay = document.getElementById("overlay");
   const cartPanel = document.getElementById("cartPanel");
@@ -27,16 +46,10 @@
   const zoomModal = document.getElementById("zoomModal");
   const zoomImage = document.getElementById("zoomImage");
   const zoomThumbs = document.getElementById("zoomThumbs");
-  const zoomTitle = document.getElementById("zoomTitle");
-  const zoomPrice = document.getElementById("zoomPrice");
-  const zoomStock = document.getElementById("zoomStock");
-  const zoomTone = document.getElementById("zoomTone");
-  const zoomDescription = document.getElementById("zoomDescription");
-  const zoomSizes = document.getElementById("zoomSizes");
-  const zoomAdd = document.getElementById("zoomAdd");
-  const zoomWhatsapp = document.getElementById("zoomWhatsapp");
   const zoomClose = document.getElementById("zoomClose");
   const siteHeader = document.querySelector(".site-header");
+  const siteFooter = document.querySelector(".site-footer");
+  const ticker = document.querySelector(".ticker");
   const mobileCta = document.querySelector(".mobile-cta");
 
   let products = [];
@@ -44,6 +57,8 @@
   let activeProductId = "";
   let openProductId = "";
   let zoomProductId = "";
+  let activeDetailProductId = "";
+  let activeDetailImageIndex = 0;
   let activeZoomImageIndex = 0;
   let activeCategory = "all";
   let lastScrollY = window.scrollY;
@@ -162,6 +177,194 @@
         >${escapeHtml(size.label)}</button>
       `;
     }).join("");
+  }
+
+  function getDetailProductIdFromHash() {
+    const hash = window.location.hash.replace(/^#/, "");
+    if (!hash.toLowerCase().startsWith("producto/")) {
+      return "";
+    }
+
+    try {
+      return decodeURIComponent(hash.slice("producto/".length));
+    } catch (error) {
+      return hash.slice("producto/".length);
+    }
+  }
+
+  function setStoreVisibility(showDetail) {
+    if (storeMain) {
+      storeMain.hidden = showDetail;
+    }
+
+    if (productDetailView) {
+      productDetailView.hidden = !showDetail;
+    }
+
+    document.body.classList.toggle("product-detail-active", showDetail);
+
+    [siteHeader, siteFooter, ticker, mobileCta].forEach((element) => {
+      if (element) {
+        element.hidden = showDetail;
+      }
+    });
+  }
+
+  function navigateToProduct(productId) {
+    if (!productId) {
+      return;
+    }
+
+    const nextHash = `producto/${encodeURIComponent(productId)}`;
+    if (window.location.hash.replace(/^#/, "") === nextHash) {
+      handleRouteChange();
+      return;
+    }
+
+    window.location.hash = nextHash;
+  }
+
+  function navigateToStore() {
+    activeDetailProductId = "";
+    activeDetailImageIndex = 0;
+    window.location.hash = "inicio";
+  }
+
+  function getRelatedProducts(product) {
+    const category = getProductCategory(product).toLowerCase();
+    const sameCategory = category
+      ? products.filter((item) => item.id !== product.id && getProductCategory(item).toLowerCase() === category)
+      : [];
+    const fallback = products.filter((item) => item.id !== product.id && !sameCategory.includes(item));
+
+    return [...sameCategory, ...fallback].slice(0, 4);
+  }
+
+  function renderDetailDots(product, images, selectedImageIndex) {
+    if (!detailDots) {
+      return;
+    }
+
+    detailDots.hidden = images.length <= 1;
+    detailDots.innerHTML = images.map((image, index) => `
+      <button
+        class="detail-dot${index === selectedImageIndex ? " active" : ""}"
+        type="button"
+        data-index="${index}"
+        aria-label="Ver foto ${index + 1} de ${escapeHtml(product.name)}"
+      ></button>
+    `).join("");
+  }
+
+  function renderDetailGalleryControls(images) {
+    const shouldShowArrows = images.length > 1;
+
+    [detailPrevButton, detailNextButton].forEach((button) => {
+      if (!button) {
+        return;
+      }
+
+      button.hidden = !shouldShowArrows;
+      button.disabled = !shouldShowArrows;
+    });
+  }
+
+  function navigateDetailImage(direction) {
+    const product = getProduct(activeDetailProductId);
+    if (!product) {
+      return;
+    }
+
+    const images = getProductImages(product);
+    if (images.length <= 1) {
+      return;
+    }
+
+    activeDetailImageIndex = (activeDetailImageIndex + direction + images.length) % images.length;
+    renderProductDetail();
+  }
+
+  function renderRelatedProducts(product) {
+    if (!detailRelated) {
+      return;
+    }
+
+    const relatedProducts = getRelatedProducts(product);
+
+    if (!relatedProducts.length) {
+      detailRelated.innerHTML = "";
+      return;
+    }
+
+    detailRelated.innerHTML = relatedProducts.map((item) => `
+      <article class="detail-related-card" data-id="${escapeHtml(item.id)}">
+        <div class="detail-related-media">
+          <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
+        </div>
+        <h3>${escapeHtml(item.name)}</h3>
+        <div class="detail-related-price">${formatPrice(item.price)}</div>
+      </article>
+    `).join("");
+  }
+
+  function renderProductDetail() {
+    const product = getProduct(activeDetailProductId);
+    if (!product || !productDetailView) {
+      return;
+    }
+
+    const images = getProductImages(product);
+    const selectedImageIndex = Math.min(activeDetailImageIndex, images.length - 1);
+    const selectedSize = selectedSizes[product.id] || "";
+    const canAdd = product.sizes.some((size) => size.label === selectedSize && size.stock > 0);
+    const whatsappLink = buildWhatsappLink(product, selectedSize);
+
+    activeDetailImageIndex = selectedImageIndex;
+    detailMainImage.src = images[selectedImageIndex] || product.image;
+    detailMainImage.alt = product.name;
+    detailCategory.textContent = getProductCategory(product) || product.tone || "SUTTIL";
+    detailName.textContent = product.name;
+    detailWhatsapp.href = whatsappLink;
+    detailPrice.textContent = formatPrice(product.price);
+    detailDescription.textContent = product.description;
+    detailStock.textContent = getAvailabilityCopy(product);
+    detailSizes.innerHTML = renderSizeButtons(product);
+    detailAddButton.disabled = !canAdd;
+    detailConsultButton.href = whatsappLink;
+    renderDetailDots(product, images, selectedImageIndex);
+    renderDetailGalleryControls(images);
+    renderRelatedProducts(product);
+  }
+
+  function showProductDetail(productId) {
+    const product = getProduct(productId);
+    if (!product) {
+      setStoreVisibility(false);
+      if (window.location.hash) {
+        window.location.hash = "inicio";
+      }
+      return;
+    }
+
+    activeDetailProductId = product.id;
+    activeDetailImageIndex = 0;
+    setActiveProduct(product.id);
+    setStoreVisibility(true);
+    renderProductDetail();
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  function handleRouteChange() {
+    const detailProductId = getDetailProductIdFromHash();
+
+    if (detailProductId) {
+      showProductDetail(detailProductId);
+      return;
+    }
+
+    activeDetailProductId = "";
+    activeDetailImageIndex = 0;
+    setStoreVisibility(false);
   }
 
   function renderProductCard(product) {
@@ -336,6 +539,10 @@
     productGrid.innerHTML = filteredProducts.map(renderProductCard).join("");
     syncHero();
     renderSpotlight();
+
+    if (activeDetailProductId) {
+      renderProductDetail();
+    }
   }
 
   function syncCardState() {
@@ -374,7 +581,11 @@
   }
 
   function renderCart() {
-    cartButton.textContent = `Selecciones (${cart.length})`;
+    const cartLabel = `Selecciones (${cart.length})`;
+    cartButton.textContent = cartLabel;
+    if (detailCartButton) {
+      detailCartButton.textContent = cartLabel;
+    }
     cartTotal.textContent = formatPrice(cart.reduce((sum, item) => sum + item.price, 0));
 
     if (!cart.length) {
@@ -410,8 +621,6 @@
       return;
     }
 
-    const selectedSize = selectedSizes[product.id] || "";
-    const canAdd = product.sizes.some((size) => size.label === selectedSize && size.stock > 0);
     const images = getProductImages(product);
     const selectedImageIndex = Math.min(activeZoomImageIndex, images.length - 1);
 
@@ -429,19 +638,11 @@
         <img src="${escapeHtml(image)}" alt="">
       </button>
     `).join("");
-    zoomTitle.textContent = product.name;
-    zoomPrice.textContent = formatPrice(product.price);
-    zoomStock.textContent = getAvailabilityCopy(product);
-    zoomTone.textContent = product.tone;
-    zoomDescription.textContent = product.description;
-    zoomSizes.innerHTML = renderSizeButtons(product);
-    zoomAdd.disabled = !canAdd;
-    zoomWhatsapp.href = buildWhatsappLink(product, selectedSize);
   }
 
-  function openZoom(productId) {
+  function openZoom(productId, imageIndex = 0) {
     zoomProductId = productId;
-    activeZoomImageIndex = 0;
+    activeZoomImageIndex = imageIndex;
     renderZoom();
     lockedScrollY = window.scrollY;
     document.body.style.top = `-${lockedScrollY}px`;
@@ -498,36 +699,8 @@
       return;
     }
 
-    const productId = card.dataset.id;
-    const sizeButton = event.target.closest(".size-btn");
-    const addButton = event.target.closest(".add-btn");
-    const consultButton = event.target.closest(".consult-btn");
-
-    if (event.target.closest(".product-media")) {
-      openZoom(productId);
-      return;
-    }
-
-    if (sizeButton) {
-      if (sizeButton.disabled) {
-        return;
-      }
-      selectedSizes[productId] = sizeButton.dataset.size;
-      openCard(productId);
-      return;
-    }
-
-    if (addButton) {
-      addToCart(productId);
-      return;
-    }
-
-    if (consultButton) {
-      consultButton.href = buildWhatsappLink(getProduct(productId), selectedSizes[productId] || "");
-      return;
-    }
-
-    openCard(productId);
+    event.preventDefault();
+    navigateToProduct(card.dataset.id);
   });
 
   categoryFilter?.addEventListener("click", (event) => {
@@ -550,17 +723,6 @@
     renderCart();
   });
 
-  zoomSizes.addEventListener("click", (event) => {
-    const button = event.target.closest(".size-btn");
-    if (!button || button.disabled || !zoomProductId) {
-      return;
-    }
-
-    selectedSizes[zoomProductId] = button.dataset.size;
-    renderProducts();
-    renderZoom();
-  });
-
   zoomThumbs.addEventListener("click", (event) => {
     const button = event.target.closest(".zoom-thumb");
     if (!button || !zoomProductId) {
@@ -569,6 +731,58 @@
 
     activeZoomImageIndex = Number(button.dataset.index) || 0;
     renderZoom();
+  });
+
+  detailBack?.addEventListener("click", navigateToStore);
+  detailCartButton?.addEventListener("click", openCart);
+  detailPrevButton?.addEventListener("click", () => navigateDetailImage(-1));
+  detailNextButton?.addEventListener("click", () => navigateDetailImage(1));
+
+  detailPhotoButton?.addEventListener("click", () => {
+    if (!activeDetailProductId) {
+      return;
+    }
+
+    openZoom(activeDetailProductId, activeDetailImageIndex);
+  });
+
+  detailDots?.addEventListener("click", (event) => {
+    const button = event.target.closest(".detail-dot");
+    if (!button || !activeDetailProductId) {
+      return;
+    }
+
+    activeDetailImageIndex = Number(button.dataset.index) || 0;
+    renderProductDetail();
+  });
+
+  detailSizes?.addEventListener("click", (event) => {
+    const button = event.target.closest(".size-btn");
+    if (!button || button.disabled || !activeDetailProductId) {
+      return;
+    }
+
+    selectedSizes[activeDetailProductId] = button.dataset.size;
+    renderProducts();
+    renderProductDetail();
+  });
+
+  detailAddButton?.addEventListener("click", () => {
+    if (!activeDetailProductId) {
+      return;
+    }
+
+    addToCart(activeDetailProductId);
+    renderProductDetail();
+  });
+
+  detailRelated?.addEventListener("click", (event) => {
+    const card = event.target.closest(".detail-related-card");
+    if (!card) {
+      return;
+    }
+
+    navigateToProduct(card.dataset.id);
   });
 
   cartButton.addEventListener("click", openCart);
@@ -580,15 +794,6 @@
     if (event.target === zoomModal) {
       closeZoom();
     }
-  });
-
-  zoomAdd.addEventListener("click", () => {
-    if (!zoomProductId) {
-      return;
-    }
-
-    addToCart(zoomProductId);
-    closeZoom();
   });
 
   checkoutButton.addEventListener("click", () => {
@@ -606,8 +811,10 @@
   window.addEventListener("storage", async () => {
     await refreshProducts();
     renderProducts();
+    handleRouteChange();
   });
 
+  window.addEventListener("hashchange", handleRouteChange);
   window.addEventListener("scroll", syncScrollUi, { passive: true });
   window.addEventListener("resize", syncScrollUi);
 
@@ -615,6 +822,7 @@
     await refreshProducts();
     renderProducts();
     renderCart();
+    handleRouteChange();
     syncScrollUi();
   }
 

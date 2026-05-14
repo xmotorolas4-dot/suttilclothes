@@ -119,7 +119,7 @@
         </nav>
       </header>
 
-      <main>
+      <main id="storeMain">
         <section class="hero container" id="inicio">
           <div class="hero-copy">
             <div>
@@ -142,7 +142,6 @@
                 >
               </div>
             </div>
-
           </div>
 
           <div class="hero-visual panel">
@@ -160,10 +159,6 @@
               <strong id="heroTag"
                 ><span class="pulse-dot"></span> Drop disponible</strong
               >
-              <p id="heroTagText">
-                Toca una prenda para ver disponibilidad, elegir talle y abrir el
-                detalle completo.
-              </p>
             </div>
           </div>
         </section>
@@ -184,7 +179,11 @@
 
           <div class="category-filter-shell">
             <span class="category-filter-label">Categorias</span>
-            <div class="category-filter" id="categoryFilter" aria-label="Filtrar por categoria"></div>
+            <div
+              class="category-filter"
+              id="categoryFilter"
+              aria-label="Filtrar por categoria"
+            ></div>
           </div>
 
           <div class="product-grid" id="productGrid"></div>
@@ -232,6 +231,126 @@
           </div>
         </section>
       </main>
+
+      <section
+        class="product-detail-view"
+        id="productDetailView"
+        hidden
+        aria-live="polite"
+      >
+        <header class="detail-header">
+          <button
+            class="detail-nav-btn"
+            id="detailBack"
+            type="button"
+            aria-label="Volver a la tienda"
+          >
+            Volver
+          </button>
+          <a class="detail-brand" href="#inicio" aria-label="Ir al inicio">
+            <img src="assets/sticker.png" alt="SUTTIL Clothes" />
+          </a>
+          <button class="detail-nav-btn" id="detailCartButton" type="button">
+            Selecciones (0)
+          </button>
+        </header>
+
+        <div class="detail-gallery">
+          <button
+            class="detail-gallery-arrow detail-gallery-arrow--prev"
+            id="detailPrevButton"
+            type="button"
+            aria-label="Ver foto anterior"
+            hidden
+          >
+            &lsaquo;
+          </button>
+          <button
+            class="detail-photo-button"
+            id="detailPhotoButton"
+            type="button"
+            aria-label="Ampliar foto del producto"
+          >
+            <img
+              id="detailMainImage"
+              src="assets/sticker.png"
+              alt="Producto SUTTIL"
+            />
+          </button>
+          <button
+            class="detail-gallery-arrow detail-gallery-arrow--next"
+            id="detailNextButton"
+            type="button"
+            aria-label="Ver foto siguiente"
+            hidden
+          >
+            &rsaquo;
+          </button>
+          <div
+            class="detail-dots"
+            id="detailDots"
+            aria-label="Fotos del producto"
+          ></div>
+        </div>
+
+        <div class="detail-info">
+          <p class="detail-category" id="detailCategory">SUTTIL</p>
+          <div class="detail-title-row">
+            <h1 id="detailName">Producto</h1>
+            <a
+              class="detail-heart"
+              id="detailWhatsapp"
+              href="#"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Consultar este producto por WhatsApp"
+              >&#9825;</a
+            >
+          </div>
+          <div class="detail-price" id="detailPrice">$0</div>
+          <p class="detail-description" id="detailDescription"></p>
+          <p class="detail-stock" id="detailStock"></p>
+
+          <div class="detail-sizes-block">
+            <div class="detail-row-head">
+              <span>Talle</span>
+            </div>
+            <div
+              class="detail-size-row"
+              id="detailSizes"
+              role="group"
+              aria-label="Talles disponibles"
+            ></div>
+          </div>
+
+          <button
+            class="detail-add-btn"
+            id="detailAddButton"
+            type="button"
+            disabled
+          >
+            Agregar al carrito
+          </button>
+
+          <div class="detail-actions">
+            <a
+              id="detailConsultButton"
+              href="#"
+              target="_blank"
+              rel="noreferrer"
+              >Consultar por WhatsApp</a
+            >
+          </div>
+
+          <section
+            class="detail-related-section"
+            aria-labelledby="relatedTitle"
+          >
+            <h2 id="relatedTitle">Tambien te puede interesar</h2>
+            <div class="detail-related-grid" id="detailRelated"></div>
+          </section>
+        </div>
+      </section>
 
       <footer class="site-footer">
         <div class="footer-inner container">
@@ -298,58 +417,21 @@
     <div class="overlay" id="overlay"></div>
 
     <div class="zoom-modal" id="zoomModal" aria-hidden="true">
-      <div class="zoom-dialog">
-        <div class="zoom-stage">
-          <img
-            id="zoomImage"
-            src="assets/sticker.png"
-            alt="Vista ampliada de la prenda"
-          />
-          <div class="zoom-thumbs" id="zoomThumbs" hidden></div>
-        </div>
-        <div class="zoom-meta">
-          <div class="zoom-meta-top">
-            <button
-              class="zoom-close"
-              id="zoomClose"
-              type="button"
-              aria-label="Cerrar vista ampliada"
-            >
-              x
-            </button>
-            <h3 id="zoomTitle">SUTTIL</h3>
-            <div class="zoom-price" id="zoomPrice">$0</div>
-            <div class="zoom-stock" id="zoomStock">
-              Selecciona un talle para ver disponibilidad.
-            </div>
-            <div class="zoom-tone" id="zoomTone">Detalle del producto</div>
-            <p id="zoomDescription">
-              Vista ampliada para revisar mejor la prenda.
-            </p>
-            <div class="zoom-size-wrap">
-              <strong>Talles</strong>
-              <div
-                class="size-row"
-                id="zoomSizes"
-                role="group"
-                aria-label="Talles en detalle"
-              ></div>
-            </div>
-          </div>
-          <div class="zoom-actions">
-            <button class="btn btn-primary" id="zoomAdd" type="button">
-              Agregar al carrito
-            </button>
-            <a
-              class="btn btn-accent"
-              id="zoomWhatsapp"
-              href="#"
-              target="_blank"
-              rel="noreferrer"
-              >Consultar esta prenda</a
-            >
-          </div>
-        </div>
+      <button
+        class="zoom-close"
+        id="zoomClose"
+        type="button"
+        aria-label="Cerrar vista ampliada"
+      >
+        x
+      </button>
+      <div class="zoom-stage">
+        <img
+          id="zoomImage"
+          src="assets/sticker.png"
+          alt="Vista ampliada de la prenda"
+        />
+        <div class="zoom-thumbs" id="zoomThumbs" hidden></div>
       </div>
     </div>
 
