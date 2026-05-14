@@ -1,15 +1,45 @@
 (function () {
   const STORAGE_PRODUCTS_KEY = "suttil-products-sheet-cache-v1";
-  const ADMIN_SESSION_KEY = "suttil-admin-session-v1";
-  const ADMIN_PASSWORD = "suttil2026";
   const WHATSAPP_PHONE = "3464624227";
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCiZyzCSU3bjNEY-rfgu_FmZSpcdQ7KzBvzbCgkCQiapQTjkAB5NJnXs8V5OqDZJJJKfcGLmR2YxjA/pub?output=csv";
-  const SHEET_CSV_API_URL = "/api/products";
   const SHEET_CSV_PROXY_URL = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(SHEET_CSV_URL)}`;
-  const SHEET_FETCH_URLS = [SHEET_CSV_API_URL, SHEET_CSV_PROXY_URL, SHEET_CSV_URL];
+  const SHEET_FETCH_URLS = [SHEET_CSV_URL, SHEET_CSV_PROXY_URL];
   const SHEET_FETCH_TIMEOUT_MS = 8000;
   const DEFAULT_IMAGE = "assets/sticker.png";
   const DEFAULT_SIZES = ["S", "M", "L", "XL", "XXL"];
+  const FALLBACK_CSV = `Producto,Talle XL,Talle L,Talle M,Talle S,Precio,Imagen,Descripcion,Categoria
+SUTTIL TONE 01,FALSE,FALSE,TRUE,TRUE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777830396/001_edlliu.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684579/_MEC0416_y7lxrf.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Verde. Logo Amarillo.,Remeras
+SUTTIL TONE 02,FALSE,FALSE,FALSE,TRUE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853380/002_rznmwy.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778693366/_MEC0355_glph6s.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Celeste. Logo Marron.,Remeras
+SUTTIL TONE 03,FALSE,TRUE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853526/003_nebjfy.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Celeste. Logo Gris.,Remeras
+SUTTIL TONE 04,TRUE,FALSE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853572/004_eh4pw3.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Beige. Logo Marron.,Remeras
+SILENT WAVE 01,FALSE,FALSE,TRUE,FALSE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853652/005_wrzhzj.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778693364/_MEC0442_ajgrjw.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno SILENT WAVE con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Marron.,Remeras
+COMBAT SKATE 01,TRUE,FALSE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853746/006_hzqrtj.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno COMBAT SKATE con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Marron.,Remeras
+SUTTIL TONE 05,FALSE,FALSE,FALSE,TRUE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853789/007_tpmjdb.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Marron. Logo Amarillo.,Remeras
+PIZZA LIBERTY 01,FALSE,FALSE,TRUE,FALSE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853809/008_whv00t.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778693366/_MEC0434_kq47pe.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno PIZZA LIBERTY con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro Washed.,Remeras
+SUTTIL TONE 06,TRUE,FALSE,TRUE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853828/009_gkgx9v.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro Washed. Logo Negro.,Remeras
+E=mc\u00b2,FALSE,FALSE,TRUE,FALSE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853837/010_nr5p3c.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778693385/_MEC0338_ocggpn.jpg, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778693370/_MEC0351_x4awtz.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno E=mc2 con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro Washed.,Remeras
+SUTTIL TONE 07,TRUE,FALSE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853858/011_kubtgw.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro Washed. Logo Gris.,Remeras
+SUTTIL TONE 08,FALSE,TRUE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853882/012_xtelbi.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro Washed. Logo Bordo.,Remeras
+SUTTIL TONE 09,FALSE,FALSE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853923/013_ggyejr.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro Washed. Logo Amarillo.,Remeras
+COMBAT SKATE 02,FALSE,FALSE,FALSE,TRUE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853926/014_armrwq.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778696070/_MEC0389_dbnzhr.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno COMBAT SKATE con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro.,Remeras
+CONFUSED,FALSE,FALSE,TRUE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853928/015_b6xhou.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno CONFUSED con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro.,Remeras
+SUTTIL TONE 10,TRUE,FALSE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853937/016_kjbd2z.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro. Logo Gris.,Remeras
+PIZZA LIBERTY 02,FALSE,FALSE,FALSE,TRUE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853944/017_uielpd.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684593/_MEC0396_c4de5f.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno PIZZA LIBERTY con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Crudo.,Remeras
+SUTTIL TONE 11,FALSE,FALSE,TRUE,FALSE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853956/018_q2mors.png,https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778693376/_MEC0368_y2fkgk.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Crudo. Logo Negro.,Remeras
+SUTTIL TONE 12,FALSE,TRUE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853966/019_vgrijp.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Crudo. Logo Marron.,Remeras
+SUTTIL TONE 13,FALSE,TRUE,FALSE,TRUE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777853986/020_ffdpbb.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Crudo. Logo Bordo.,Remeras
+DESERT WAVE,FALSE,FALSE,TRUE,FALSE,"$28,500.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777854004/021_kp97he.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684578/_MEC0464_lxdpeq.jpg",Remera oversize SUTTIL. Hecha en algodon premium. Diseno DESERT WAVE con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Crudo.,Remeras
+SILENT WAVE 02,TRUE,FALSE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777854832/022_kezmog.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno SILENT WAVE con logo frontal estampado. Corte relajado y comodo para el uso diario. Color crudo.,Remeras
+SUTTIL TONE 14,FALSE,TRUE,FALSE,FALSE,"$28,500.00",https://res.cloudinary.com/dcg5qxzxq/image/upload/v1777854875/023_nuepfc.png,Remera oversize SUTTIL. Hecha en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Tiza. Logo Marron.,Remeras
+OG HOODIE,FALSE,TRUE,FALSE,TRUE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630187/002_uqy1dh.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684108/_MEC0534_unoa8t.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro. Logo Blanco.,Buzos
+TRACE HOODIE,FALSE,FALSE,TRUE,TRUE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630162/001_mihk2k.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630123/001.1_lqb1ul.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684558/_MEC0547_y9uveb.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno TRACE HOODIE con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro. Logo Gris.,Buzos
+OG GREEN,FALSE,FALSE,TRUE,FALSE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630198/003_l02x5r.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684568/_MEC0520_pw9xup.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Verde. Logo Amarillo.,Buzos
+HOODIE E=mc\u00b2,FALSE,FALSE,TRUE,TRUE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630218/004_miumi1.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630229/004.1_lbwqtd.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684561/_MEC0530_yfwkxk.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno E=mc2 con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro.,Buzos
+SILENT WAVE HOODIE,FALSE,FALSE,FALSE,TRUE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630244/005_eupoi7.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778687455/_MEC0559_zgmnjx.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno SILENT WAVE con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro.,Buzos
+ESSENTIAL HOODIE,TRUE,TRUE,TRUE,TRUE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630254/006_gkdp7u.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684558/_MEC0567_vlfjeb.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Negro. Logo Gris.,Buzos
+ESSENTIAL BEIGE 01,FALSE,FALSE,TRUE,TRUE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630308/010_cjupci.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684576/_MEC0499_fdo1jr.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Beige. Logo Marron.,Buzos
+OG BEIGE,FALSE,FALSE,TRUE,FALSE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630296/009_qj4ula.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684572/_MEC0505_ntvlwx.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Beige. Logo Marron.,Buzos
+ESSENTIAL BEIGE 02,FALSE,FALSE,FALSE,TRUE,"$45,000.00","https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778630284/008_bbljhi.png, https://res.cloudinary.com/dcg5qxzxq/image/upload/v1778684572/_MEC0515_uc1qam.jpg",Buzo oversize SUTTIL. Hecho en algodon premium. Diseno minimalista con logo frontal estampado. Corte relajado y comodo para el uso diario. Color Beige. Logo Gris.,Buzos`;
 
   const SHEET_COLUMNS = {
     id: ["ID", "Id", "id", "Codigo", "codigo", "SKU", "sku"],
@@ -263,11 +293,35 @@
         throw new Error(`HTTP ${response.status}`);
       }
 
-      return await response.text();
+      const text = await response.text();
+      validateCsvText(text, url);
+      return text;
     } finally {
       if (timer) {
         window.clearTimeout(timer);
       }
+    }
+  }
+
+  function validateCsvText(text, url) {
+    const content = String(text || "").trim();
+    const firstLine = content.split(/\r?\n/, 1)[0] || "";
+    const normalizedFirstLine = firstLine.toLowerCase();
+
+    if (!content) {
+      throw new Error(`Respuesta vacia desde ${url}`);
+    }
+
+    if (normalizedFirstLine.startsWith("<!doctype") || normalizedFirstLine.startsWith("<html")) {
+      throw new Error(`La fuente ${url} devolvio HTML en vez de CSV`);
+    }
+
+    const headers = firstLine.split(",").map((header) => header.replace(/^\uFEFF/, "").trim().toLowerCase());
+    const hasProductHeader = SHEET_COLUMNS.name
+      .some((name) => headers.includes(String(name).trim().toLowerCase()));
+
+    if (!hasProductHeader) {
+      throw new Error(`La fuente ${url} no tiene encabezado de productos`);
     }
   }
 
@@ -487,12 +541,24 @@
   }
 
   function saveProducts(products) {
-    localStorage.setItem(STORAGE_PRODUCTS_KEY, JSON.stringify(products.map(normalizeProduct)));
+    try {
+      localStorage.setItem(STORAGE_PRODUCTS_KEY, JSON.stringify(products.map(normalizeProduct)));
+    } catch (error) {
+      // La tienda debe seguir funcionando aunque el navegador bloquee storage.
+    }
   }
 
   function resetProducts() {
-    localStorage.removeItem(STORAGE_PRODUCTS_KEY);
+    try {
+      localStorage.removeItem(STORAGE_PRODUCTS_KEY);
+    } catch (error) {
+      // Sin accion: el cache es una mejora, no una dependencia critica.
+    }
     return [];
+  }
+
+  function getFallbackProducts() {
+    return mergeSheetRowsIntoProducts(parseCsv(FALLBACK_CSV));
   }
 
   async function syncProductsFromSheet() {
@@ -529,15 +595,18 @@
         }
       };
     } catch (error) {
+      const fallbackProducts = cachedProducts.length ? cachedProducts : getFallbackProducts();
+
       return {
-        products: cachedProducts,
+        products: fallbackProducts,
         meta: {
           rows: 0,
-          syncedProductsCount: cachedProducts.length,
-          managedProductsCount: cachedProducts.length,
+          syncedProductsCount: fallbackProducts.length,
+          managedProductsCount: fallbackProducts.length,
           sourceUrl: SHEET_CSV_URL,
           state: "error",
           usingCache: cachedProducts.length > 0,
+          usingFallback: cachedProducts.length === 0,
           error: error instanceof Error ? error.message : "No se pudo leer la hoja."
         }
       };
@@ -566,23 +635,6 @@
       .join(", ");
   }
 
-  function login(password) {
-    if (password !== ADMIN_PASSWORD) {
-      return false;
-    }
-
-    sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
-    return true;
-  }
-
-  function logout() {
-    sessionStorage.removeItem(ADMIN_SESSION_KEY);
-  }
-
-  function isAuthenticated() {
-    return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1";
-  }
-
   window.SuttilProducts = {
     SHEET_CSV_URL,
     WHATSAPP_PHONE,
@@ -599,9 +651,6 @@
     formatPrice,
     parseSizesInput,
     stringifySizes,
-    syncProductsFromSheet,
-    login,
-    logout,
-    isAuthenticated
+    syncProductsFromSheet
   };
 })();
