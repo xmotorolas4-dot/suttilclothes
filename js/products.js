@@ -2,7 +2,7 @@
   const STORAGE_PRODUCTS_KEY = "suttil-products-sheet-cache-v1";
   const ADMIN_SESSION_KEY = "suttil-admin-session-v1";
   const ADMIN_PASSWORD = "suttil2026";
-  const WHATSAPP_PHONE = "5493464636708";
+  const WHATSAPP_PHONE = "3464624227";
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTCiZyzCSU3bjNEY-rfgu_FmZSpcdQ7KzBvzbCgkCQiapQTjkAB5NJnXs8V5OqDZJJJKfcGLmR2YxjA/pub?output=csv";
   const SHEET_CSV_PROXY_URL = `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(SHEET_CSV_URL)}`;
   const SHEET_FETCH_URLS = [SHEET_CSV_PROXY_URL, SHEET_CSV_URL];
@@ -18,6 +18,7 @@
     stock: ["Stock", "stock", "Cantidad", "cantidad", "Unidades", "unidades"],
     price: ["Precio", "precio", "Price", "price"],
     image: ["Imagen", "imagen", "Image", "image", "Img", "img", "Foto", "foto", "URL imagen", "url imagen"],
+    category: ["Categoria", "categoria", "Categoría", "categoría", "Category", "category", "Tipo", "tipo"],
     tag: ["Tag", "tag", "Etiqueta", "etiqueta"],
     tone: ["Tono", "tono", "Color", "color", "Detalle", "detalle"],
     description: ["Descripcion", "descripcion", "Description", "description", "Detalle largo", "detalle largo"],
@@ -100,6 +101,7 @@
       price: Math.max(0, Number(product?.price) || 0),
       image: images[0],
       images,
+      category: String(product?.category || "").trim(),
       tag: String(product?.tag || name).trim(),
       tone: String(product?.tone || "Drop SUTTIL").trim(),
       description: String(product?.description || "Prenda disponible en la coleccion actual.").trim(),
@@ -392,6 +394,7 @@
           price: 0,
           image: DEFAULT_IMAGE,
           images: [DEFAULT_IMAGE],
+          category: "",
           tag: productName,
           tone: "Drop SUTTIL",
           description: "Prenda disponible en la coleccion actual.",
@@ -408,6 +411,7 @@
       const priceValue = parseLooseNumber(getSheetCell(row, SHEET_COLUMNS.price));
       const orderValue = parseLooseNumber(getSheetCell(row, SHEET_COLUMNS.order));
       const imageValue = String(getSheetCell(row, SHEET_COLUMNS.image) || "").trim();
+      const categoryValue = String(getSheetCell(row, SHEET_COLUMNS.category) || "").trim();
       const tagValue = String(getSheetCell(row, SHEET_COLUMNS.tag) || "").trim();
       const toneValue = String(getSheetCell(row, SHEET_COLUMNS.tone) || "").trim();
       const descriptionValue = String(getSheetCell(row, SHEET_COLUMNS.description) || "").trim();
@@ -429,6 +433,10 @@
           group.image = images[0];
           group.images = images;
         }
+      }
+
+      if (categoryValue) {
+        group.category = categoryValue;
       }
 
       if (tagValue) {

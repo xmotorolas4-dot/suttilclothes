@@ -14,6 +14,7 @@
   const heroTitle = document.getElementById("heroTitle");
   const heroDropCount = document.getElementById("heroDropCount");
   const collectionTitle = document.getElementById("collectionTitle");
+  const categoryFilter = document.getElementById("categoryFilter");
   const spotlightVisual = document.getElementById("spotlightVisual");
 
   const overlay = document.getElementById("overlay");
@@ -45,6 +46,7 @@
   let openProductId = "";
   let zoomProductId = "";
   let activeZoomImageIndex = 0;
+  let activeCategory = "all";
   let lastScrollY = window.scrollY;
   const cart = [];
 
@@ -67,6 +69,46 @@
 
     if (!validIds.has(zoomProductId)) {
       closeZoom();
+    }
+  }
+
+  function getProductCategory(product) {
+    return String(product?.category || "").trim();
+  }
+
+  function getCategories() {
+    const categories = new Map();
+
+    products.forEach((product) => {
+      const category = getProductCategory(product);
+      const key = category.toLowerCase();
+
+      if (category && !categories.has(key)) {
+        categories.set(key, category);
+      }
+    });
+
+    return Array.from(categories.values());
+  }
+
+  function getFilteredProducts() {
+    if (activeCategory === "all") {
+      return products;
+    }
+
+    const activeKey = activeCategory.toLowerCase();
+    return products.filter((product) => getProductCategory(product).toLowerCase() === activeKey);
+  }
+
+  function syncActiveProductForFilter(filteredProducts) {
+    const filteredIds = new Set(filteredProducts.map((product) => product.id));
+
+    if (!filteredIds.has(activeProductId)) {
+      activeProductId = filteredProducts[0]?.id || "";
+    }
+
+    if (!filteredIds.has(openProductId)) {
+      openProductId = "";
     }
   }
 
@@ -127,6 +169,7 @@
     const canAdd = product.sizes.some((size) => size.label === selectedSize && size.stock > 0);
     const availabilityClass = hasAvailableSizes(product) ? "success" : "danger";
     const availabilityLabel = hasAvailableSizes(product) ? "Disponible" : "No disponible";
+    const categoryLabel = getProductCategory(product);
 
     return `
       <article class="product-card${activeProductId === product.id ? " is-active" : ""}${openProductId === product.id ? " is-open" : ""}" data-id="${escapeHtml(product.id)}">
@@ -142,6 +185,7 @@
             <div>
               <h3 class="product-name">${escapeHtml(product.name)}</h3>
               <p class="product-tone">${escapeHtml(product.tone)}</p>
+              ${categoryLabel ? `<p class="product-category">${escapeHtml(categoryLabel)}</p>` : ""}
             </div>
             <span class="product-price">${formatPrice(product.price)}</span>
           </div>
@@ -166,7 +210,7 @@
   }
 
   function renderSpotlight() {
-    spotlightVisual.innerHTML = products.slice(0, 2).map((product) => `
+    spotlightVisual.innerHTML = getFilteredProducts().slice(0, 2).map((product) => `
       <div class="spotlight-tile">
         <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
       </div>
@@ -174,7 +218,8 @@
   }
 
   function syncHero() {
-    const product = getProduct(activeProductId) || products[0];
+    const filteredProducts = getFilteredProducts();
+    const product = filteredProducts.find((item) => item.id === activeProductId) || filteredProducts[0];
     if (!product) {
       heroProductImage.src = "assets/sticker.png";
       heroProductImage.alt = "Logo SUTTIL";
@@ -191,7 +236,40 @@
     heroTitle.innerHTML = `Remera <span class="accent">${escapeHtml(product.tag)}</span>.`;
   }
 
+  function renderCategoryFilter() {
+    if (!categoryFilter) {
+      return;
+    }
+
+    const categories = getCategories();
+    const categoryKeys = new Set(categories.map((category) => category.toLowerCase()));
+
+    if (activeCategory !== "all" && !categoryKeys.has(activeCategory.toLowerCase())) {
+      activeCategory = "all";
+    }
+
+    if (!categories.length) {
+      categoryFilter.hidden = true;
+      categoryFilter.innerHTML = "";
+      return;
+    }
+
+    categoryFilter.hidden = false;
+    categoryFilter.innerHTML = [
+      `<button class="category-filter-btn${activeCategory === "all" ? " active" : ""}" type="button" data-category="all">Todos</button>`,
+      ...categories.map((category) => `
+        <button
+          class="category-filter-btn${activeCategory.toLowerCase() === category.toLowerCase() ? " active" : ""}"
+          type="button"
+          data-category="${escapeHtml(category)}"
+        >${escapeHtml(category)}</button>
+      `)
+    ].join("");
+  }
+
   function renderProducts() {
+    renderCategoryFilter();
+
     if (!products.length) {
       productGrid.innerHTML = `
         <article class="product-card is-open">
@@ -208,9 +286,30 @@
       return;
     }
 
-    heroDropCount.textContent = String(products.length);
-    collectionTitle.textContent = `${products.length} modelos listos para destacar`;
-    productGrid.innerHTML = products.map(renderProductCard).join("");
+    const filteredProducts = getFilteredProducts();
+    syncActiveProductForFilter(filteredProducts);
+
+    if (!filteredProducts.length) {
+      productGrid.innerHTML = `
+        <article class="product-card is-open">
+          <div class="product-body">
+            <h3 class="product-name">No hay prendas en esta categoria</h3>
+            <p class="product-copy">Proba con otra categoria o revisa la hoja publicada.</p>
+          </div>
+        </article>
+      `;
+      heroDropCount.textContent = "0";
+      collectionTitle.textContent = "Sin prendas para este filtro";
+      syncHero();
+      renderSpotlight();
+      return;
+    }
+
+    heroDropCount.textContent = String(filteredProducts.length);
+    collectionTitle.textContent = activeCategory === "all"
+      ? `${filteredProducts.length} modelos listos para destacar`
+      : `${filteredProducts.length} modelos en ${activeCategory}`;
+    productGrid.innerHTML = filteredProducts.map(renderProductCard).join("");
     syncHero();
     renderSpotlight();
   }
@@ -391,6 +490,16 @@
     }
 
     openCard(productId);
+  });
+
+  categoryFilter?.addEventListener("click", (event) => {
+    const button = event.target.closest(".category-filter-btn");
+    if (!button) {
+      return;
+    }
+
+    activeCategory = button.dataset.category || "all";
+    renderProducts();
   });
 
   cartItems.addEventListener("click", (event) => {
