@@ -55,8 +55,10 @@
       name="twitter:image"
       content="https://suttilclothes.com/assets/sticker.png"
     />
-    <link rel="stylesheet" href="css/shared.css?v=20260514-size" />
-    <link rel="stylesheet" href="css/store.css?v=20260514-size" />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <link rel="stylesheet" href="css/shared.css?v=20260514-original-img" />
+    <link rel="stylesheet" href="css/store.css?v=20260514-original-img" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -288,6 +290,9 @@
               id="detailMainImage"
               src="assets/sticker.png"
               alt="Producto SUTTIL"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
             />
           </button>
           <button
@@ -445,6 +450,7 @@
           id="zoomImage"
           src="assets/sticker.png"
           alt="Vista ampliada de la prenda"
+          decoding="async"
         />
         <div class="zoom-thumbs" id="zoomThumbs" hidden></div>
       </div>
@@ -479,7 +485,7 @@
       </div>
     </aside>
 
-    <script src="js/products.js?v=20260514-size"></script>
-    <script src="js/store.js?v=20260514-size"></script>
+    <script src="js/products.js?v=20260514-original-img"></script>
+    <script src="js/store.js?v=20260514-original-img"></script>
   </body>
 </html>
