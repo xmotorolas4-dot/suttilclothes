@@ -12,7 +12,6 @@
   const heroTag = document.getElementById("heroTag");
   const heroTagText = document.getElementById("heroTagText");
   const heroTitle = document.getElementById("heroTitle");
-  const heroDropCount = document.getElementById("heroDropCount");
   const collectionTitle = document.getElementById("collectionTitle");
   const categoryFilter = document.getElementById("categoryFilter");
   const spotlightVisual = document.getElementById("spotlightVisual");
@@ -48,6 +47,7 @@
   let activeZoomImageIndex = 0;
   let activeCategory = "all";
   let lastScrollY = window.scrollY;
+  let lockedScrollY = 0;
   const cart = [];
 
   async function refreshProducts() {
@@ -221,19 +221,41 @@
     const filteredProducts = getFilteredProducts();
     const product = filteredProducts.find((item) => item.id === activeProductId) || filteredProducts[0];
     if (!product) {
-      heroProductImage.src = "assets/sticker.png";
-      heroProductImage.alt = "Logo SUTTIL";
-      heroTag.innerHTML = '<span class="pulse-dot"></span> Drop SUTTIL';
-      heroTagText.textContent = "La coleccion va cambiando segun lo que cargues desde administracion.";
-      heroTitle.innerHTML = 'Remeras con <span class="accent">identidad</span> real.';
+      if (heroProductImage) {
+        heroProductImage.src = "assets/sticker.png";
+        heroProductImage.alt = "Logo SUTTIL";
+      }
+
+      if (heroTag) {
+        heroTag.innerHTML = '<span class="pulse-dot"></span> Drop SUTTIL';
+      }
+
+      if (heroTagText) {
+        heroTagText.textContent = "La coleccion va cambiando segun lo que cargues desde administracion.";
+      }
+
+      if (heroTitle) {
+        heroTitle.innerHTML = 'Remeras con <span class="accent">identidad</span> real.';
+      }
       return;
     }
 
-    heroProductImage.src = product.image;
-    heroProductImage.alt = product.name;
-    heroTag.innerHTML = `<span class="pulse-dot"></span> ${escapeHtml(product.tag)}`;
-    heroTagText.textContent = `${product.description} ${getAvailabilityCopy(product)}`;
-    heroTitle.innerHTML = `Remera <span class="accent">${escapeHtml(product.tag)}</span>.`;
+    if (heroProductImage) {
+      heroProductImage.src = product.image;
+      heroProductImage.alt = product.name;
+    }
+
+    if (heroTag) {
+      heroTag.innerHTML = `<span class="pulse-dot"></span> ${escapeHtml(product.tag)}`;
+    }
+
+    if (heroTagText) {
+      heroTagText.textContent = `${product.description} ${getAvailabilityCopy(product)}`;
+    }
+
+    if (heroTitle) {
+      heroTitle.innerHTML = `Remera <span class="accent">${escapeHtml(product.tag)}</span>.`;
+    }
   }
 
   function renderCategoryFilter() {
@@ -241,6 +263,7 @@
       return;
     }
 
+    const categoryFilterShell = categoryFilter.closest(".category-filter-shell");
     const categories = getCategories();
     const categoryKeys = new Set(categories.map((category) => category.toLowerCase()));
 
@@ -249,12 +272,16 @@
     }
 
     if (!categories.length) {
-      categoryFilter.hidden = true;
+      if (categoryFilterShell) {
+        categoryFilterShell.hidden = true;
+      }
       categoryFilter.innerHTML = "";
       return;
     }
 
-    categoryFilter.hidden = false;
+    if (categoryFilterShell) {
+      categoryFilterShell.hidden = false;
+    }
     categoryFilter.innerHTML = [
       `<button class="category-filter-btn${activeCategory === "all" ? " active" : ""}" type="button" data-category="all">Todos</button>`,
       ...categories.map((category) => `
@@ -279,7 +306,6 @@
           </div>
         </article>
       `;
-      heroDropCount.textContent = "0";
       collectionTitle.textContent = "Sin prendas visibles";
       syncHero();
       renderSpotlight();
@@ -298,14 +324,12 @@
           </div>
         </article>
       `;
-      heroDropCount.textContent = "0";
       collectionTitle.textContent = "Sin prendas para este filtro";
       syncHero();
       renderSpotlight();
       return;
     }
 
-    heroDropCount.textContent = String(filteredProducts.length);
     collectionTitle.textContent = activeCategory === "all"
       ? `${filteredProducts.length} modelos listos para destacar`
       : `${filteredProducts.length} modelos en ${activeCategory}`;
@@ -419,13 +443,27 @@
     zoomProductId = productId;
     activeZoomImageIndex = 0;
     renderZoom();
+    lockedScrollY = window.scrollY;
+    document.body.style.top = `-${lockedScrollY}px`;
+    document.body.classList.add("modal-open");
     zoomModal.classList.add("open");
   }
 
   function closeZoom() {
+    const wasOpen = zoomModal.classList.contains("open");
     zoomProductId = "";
     activeZoomImageIndex = 0;
     zoomModal.classList.remove("open");
+    if (!wasOpen) {
+      return;
+    }
+
+    const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+    document.body.classList.remove("modal-open");
+    document.body.style.top = "";
+    window.scrollTo(0, lockedScrollY);
+    document.documentElement.style.scrollBehavior = previousScrollBehavior;
   }
 
   function syncScrollUi() {
