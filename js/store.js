@@ -192,6 +192,16 @@
     return optimizeImageUrl(url, width);
   }
 
+  function preloadImage(url) {
+    if (!url) {
+      return;
+    }
+
+    const image = new Image();
+    image.decoding = "async";
+    image.src = url;
+  }
+
   function getAvailabilityCopy(product) {
     const selectedSize = selectedSizes[product.id] || "";
     const selectedEntry = product.sizes.find((size) => size.label === selectedSize);
@@ -350,7 +360,7 @@
     detailRelated.innerHTML = relatedProducts.map((item) => `
       <article class="detail-related-card" data-id="${escapeHtml(item.id)}">
         <div class="detail-related-media">
-          <img src="${escapeHtml(imageSrc(item.image, 700))}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async">
+          <img src="${escapeHtml(imageSrc(item.image))}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async">
         </div>
         <h3>${escapeHtml(item.name)}</h3>
         <div class="detail-related-price">${formatPrice(item.price)}</div>
@@ -371,7 +381,7 @@
     const whatsappLink = buildWhatsappLink(product, selectedSize);
 
     activeDetailImageIndex = selectedImageIndex;
-    detailMainImage.src = imageSrc(images[selectedImageIndex] || product.image, 1800);
+    detailMainImage.src = imageSrc(images[selectedImageIndex] || product.image);
     detailMainImage.alt = product.name;
     detailCategory.textContent = getProductCategory(product) || product.tone || "SUTTIL";
     detailName.textContent = product.name;
@@ -428,7 +438,7 @@
     return `
       <article class="product-card${activeProductId === product.id ? " is-active" : ""}${openProductId === product.id ? " is-open" : ""}" data-id="${escapeHtml(product.id)}">
         <div class="product-media">
-          <img src="${escapeHtml(imageSrc(product.image, 900))}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async">
+          <img src="${escapeHtml(imageSrc(product.image))}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async">
         </div>
         <div class="product-body">
           <div class="product-topline">
@@ -466,7 +476,7 @@
   function renderSpotlight() {
     spotlightVisual.innerHTML = getFilteredProducts().slice(0, 2).map((product) => `
       <div class="spotlight-tile">
-        <img src="${escapeHtml(imageSrc(product.image, 1100))}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async">
+        <img src="${escapeHtml(imageSrc(product.image))}" alt="${escapeHtml(product.name)}" loading="lazy" decoding="async">
       </div>
     `).join("");
   }
@@ -495,7 +505,7 @@
     }
 
     if (heroProductImage) {
-      heroProductImage.src = imageSrc(product.image, 1400);
+      heroProductImage.src = imageSrc(product.image);
       heroProductImage.alt = product.name;
     }
 
@@ -648,6 +658,10 @@
 
   function setActiveProduct(productId) {
     activeProductId = productId;
+    const product = getProduct(productId);
+    if (product) {
+      preloadImage(imageSrc(product.image));
+    }
     syncHero();
     syncCardState();
   }
@@ -719,7 +733,7 @@
     const selectedImageIndex = Math.min(activeZoomImageIndex, images.length - 1);
 
     activeZoomImageIndex = selectedImageIndex;
-    zoomImage.src = imageSrc(images[selectedImageIndex] || product.image, 1800);
+    zoomImage.src = imageSrc(images[selectedImageIndex] || product.image);
     zoomImage.alt = product.name;
     zoomThumbs.hidden = images.length <= 1;
     zoomThumbs.innerHTML = images.map((image, index) => `
@@ -729,7 +743,7 @@
         data-index="${index}"
         aria-label="Ver foto ${index + 1} de ${escapeHtml(product.name)}"
       >
-        <img src="${escapeHtml(imageSrc(image, 260))}" alt="" loading="lazy" decoding="async">
+        <img src="${escapeHtml(imageSrc(image))}" alt="" loading="lazy" decoding="async">
       </button>
     `).join("");
   }
