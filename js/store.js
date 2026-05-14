@@ -231,7 +231,7 @@
       }
 
       if (heroTagText) {
-        heroTagText.textContent = "La coleccion va cambiando segun lo que cargues desde administracion.";
+        heroTagText.textContent = "La coleccion va cambiando segun lo publicado en el catalogo.";
       }
 
       if (heroTitle) {

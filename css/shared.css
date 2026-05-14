@@ -1,15 +1,12 @@
 :root {
   --bg: #0a0a0a;
   --surface: #111111;
-  --surface-2: #171717;
   --ink: #f5f2ee;
   --muted: #a39c94;
   --line: rgba(245, 242, 238, 0.12);
   --accent: #e3bc10;
-  --danger: #cb5f5f;
   --success: #7dc08a;
   --shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
-  --radius: 8px;
   --container: 1240px;
 }
 
@@ -44,9 +41,7 @@ a {
 }
 
 button,
-input,
-textarea,
-select {
+input {
   font: inherit;
 }
 
@@ -99,12 +94,6 @@ button {
   background: rgba(255, 255, 255, 0.03);
 }
 
-.btn-danger {
-  border-color: rgba(203, 95, 95, 0.4);
-  color: #ffdede;
-  background: rgba(203, 95, 95, 0.08);
-}
-
 .section-kicker {
   font-size: 0.74rem;
   text-transform: uppercase;
@@ -118,11 +107,6 @@ button {
   line-height: 0.95;
   text-transform: uppercase;
   font-weight: 900;
-}
-
-.section-copy {
-  color: var(--muted);
-  line-height: 1.7;
 }
 
 .brand-lockup {
@@ -152,79 +136,3 @@ button {
   box-shadow: var(--shadow);
 }
 
-.field,
-.field-inline {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.field-inline {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.field label,
-.field-inline label {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.field span,
-.field-inline span,
-.label {
-  color: var(--muted);
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 800;
-}
-
-input,
-textarea,
-select {
-  width: 100%;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--ink);
-  padding: 0.8rem 0.9rem;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #7c766f;
-}
-
-textarea {
-  resize: vertical;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border: 1px solid var(--line);
-  padding: 0.38rem 0.6rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 800;
-}
-
-.pill.success {
-  border-color: rgba(125, 192, 138, 0.35);
-  color: var(--success);
-}
-
-.pill.muted {
-  color: var(--muted);
-}
-
-.pill.danger {
-  border-color: rgba(203, 95, 95, 0.35);
-  color: #ffc2c2;
-}
-
-@media (max-width: 760px) {
-  .field-inline {
-    grid-template-columns: 1fr;
-  }
-}

@@ -124,30 +124,6 @@
   margin-top: 1rem;
 }
 
-.hero-note {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.hero-note > div {
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
-  padding: 0.9rem;
-}
-
-.hero-note strong {
-  display: block;
-  font-size: 1.7rem;
-}
-
-.hero-note span {
-  display: block;
-  color: var(--muted);
-  line-height: 1.5;
-  margin-top: 0.2rem;
-}
-
 .hero-visual {
   min-height: 640px;
   position: relative;
@@ -221,27 +197,6 @@
   color: var(--muted);
   line-height: 1.6;
   margin-top: 0.5rem;
-}
-
-.section-band {
-  padding-block: 0.5rem 1rem;
-}
-
-.section-band-inner {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.band-item {
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
-  text-align: center;
-  padding: 0.85rem;
-  text-transform: uppercase;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  font-size: 0.76rem;
 }
 
 .products,
@@ -954,8 +909,6 @@ body.modal-open {
     transform: none;
   }
 
-  .hero-note,
-  .section-band-inner,
   .product-grid,
   .spotlight-visual {
     grid-template-columns: 1fr 1fr;
@@ -1062,12 +1015,12 @@ body.modal-open {
     bottom: 0.85rem;
     left: auto;
     z-index: 22;
-    width: 3rem;
-    height: 3rem;
+    width: auto;
+    height: auto;
     padding: 0;
     pointer-events: none;
     opacity: 0;
-    transform: translateY(1rem) scale(0.92);
+    transform: translateY(1rem);
     transition: opacity 0.28s ease, transform 0.28s ease;
   }
 
@@ -1077,28 +1030,21 @@ body.modal-open {
 
   .mobile-cta.is-visible {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 
-  .mobile-cta .whatsapp-float {
-    width: 3rem;
-    height: 3rem;
-    min-height: 0;
-    padding: 0;
-    display: grid;
-    place-items: center;
-    border-radius: 999px;
+  .mobile-cta .btn {
+    min-height: 42px;
+    padding: 0.65rem 0.85rem;
     border-color: #25d366;
     background: #25d366;
     color: #ffffff;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
     pointer-events: auto;
-  }
-
-  .whatsapp-mark {
-    width: 1.55rem;
-    height: 1.55rem;
-    fill: currentColor;
+    font-size: 0.72rem;
+    max-width: min(62vw, 15rem);
+    white-space: normal;
+    text-align: center;
   }
 
   .site-footer {
@@ -1171,9 +1117,7 @@ body.modal-open {
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  .section-band-inner,
-  .product-grid,
-  .hero-note {
+  .product-grid {
     grid-template-columns: 1fr;
   }
 
