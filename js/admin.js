@@ -153,6 +153,10 @@
               <input name="tag" type="text" value="${escapeHtml(product.tag)}" readonly>
             </label>
             <label>
+              <span>Categoria</span>
+              <input name="category" type="text" value="${escapeHtml(product.category)}" readonly>
+            </label>
+            <label>
               <span>Tono</span>
               <input name="tone" type="text" value="${escapeHtml(product.tone)}" readonly>
             </label>
